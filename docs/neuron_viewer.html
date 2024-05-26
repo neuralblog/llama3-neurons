@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Llama3 MLP Neuron Viewer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .token {
+            display: inline-block;
+            padding: 2px;
+        }
+
+        select,
+        input,
+        button {
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        @media (max-width: 600px) {
+
+            select,
+            input,
+            button {
+                font-size: 16px;
+            }
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #f1f1f1;
+            color: #333;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+
+        .tag:hover {
+            background-color: #ddd;
+        }
+
+        .button-8 {
+            background-color: #e1ecf4;
+            border-radius: 3px;
+            border: 1px solid #7aa7c7;
+            box-shadow: rgba(255, 255, 255, .7) 0 1px 0 0 inset;
+            box-sizing: border-box;
+            color: #39739d;
+            cursor: pointer;
+            display: inline-block;
+            font-family: -apple-system, system-ui, "Segoe UI", "Liberation Sans", sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.15385;
+            margin: 0;
+            outline: none;
+            padding: 5px .8em;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            vertical-align: baseline;
+            white-space: nowrap;
+        }
+
+        .button-8:hover,
+        .button-8:focus {
+            background-color: #b3d3ea;
+            color: #2c5777;
+        }
+
+        .button-8:focus {
+            box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+        }
+
+        .button-8:active {
+            background-color: #a0c7e4;
+            box-shadow: none;
+            color: #2c5777;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Llama3 MLP Neuron Viewer</h1>
+
+
+    <div>
+        <label for="layer">Layer:</label>
+        <select id="layer">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15" selected>15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+            <option value="20">20</option>
+            <option value="21">21</option>
+            <option value="22">22</option>
+            <option value="23">23</option>
+            <option value="24">24</option>
+            <option value="25">25</option>
+            <option value="26">26</option>
+            <option value="27">27</option>
+            <option value="28">28</option>
+            <option value="29">29</option>
+            <option value="30">30</option>
+            <option value="31">31</option>
+        </select>
+        <label for="neuron">Neuron:</label>
+        <input type="number" id="neuron" value="0">
+        <button id="submit" class="button-8" role="button">Submit</button>
+        <button id="previous" class="button-8" role="button">⯇</button>
+        <button id="next" class="button-8" role="button">⯈</button>
+    </div>
+
+    <div class="tag-list">
+        <span>Examples:</span>
+        <span class="tag" onclick="setNeuron(5, 43)">Looks like</span>
+        <span class="tag" onclick="setNeuron(0, 2)">Android</span>
+        <span class="tag" onclick="setNeuron(7, 251)">Wow</span>
+        <span class="tag" onclick="setNeuron(7, 263)">Everyone</span>
+        <span class="tag" onclick="setNeuron(14, 1)">Figure</span>
+        <span class="tag" onclick="setNeuron(14, 19)">Cell</span>
+        <span class="tag" onclick="setNeuron(15, 16)">Relieved</span>
+        <span class="tag" onclick="setNeuron(15, 38)">Port__</span>
+        <span class="tag" onclick="setNeuron(15, 38)">Break</span>
+        <span class="tag" onclick="setNeuron(18, 46)">As well as</span>
+        <span class="tag" onclick="setNeuron(18, 186)">Months</span>
+
+    </div>
+
+    <br />
+    <div id="output"></div>
+
+    <script>
+        const submitButton = document.getElementById('submit');
+        const layerSelect = document.getElementById('layer');
+        const neuronInput = document.getElementById('neuron');
+        const outputDiv = document.getElementById('output');
+
+        let cachedData = null;
+        let cachedLayer = null;
+
+        // Load initial state from URL hash
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStateFromHash();
+        });
+
+
+        function setNeuron(layer, neuron) {
+            layerSelect.value = layer;
+            neuronInput.value = neuron;
+            submitButton.click();
+        }
+
+        const previousButton = document.getElementById('previous');
+        previousButton.addEventListener('click', () => {
+            let currentNeuron = parseInt(neuronInput.value);
+            currentNeuron--;
+            if (currentNeuron < 0) {
+                const currentLayer = parseInt(layerSelect.value);
+                if (currentLayer > 0) {
+                    layerSelect.value = currentLayer - 1;
+                    currentNeuron = 999;
+                } else {
+                    currentNeuron = 0;
+                }
+            }
+            neuronInput.value = currentNeuron;
+            submitButton.click();
+        });
+
+        const nextButton = document.getElementById('next');
+        nextButton.addEventListener('click', () => {
+            let currentNeuron = parseInt(neuronInput.value);
+            currentNeuron++;
+            if (currentNeuron >= 1000) {
+                const currentLayer = parseInt(layerSelect.value);
+                if (currentLayer < 31) {
+                    layerSelect.value = currentLayer + 1;
+                    currentNeuron = 0;
+                } else {
+                    currentNeuron = 999;
+                }
+            }
+            neuronInput.value = currentNeuron;
+            submitButton.click();
+        });
+
+
+        submitButton.addEventListener('click', async () => {
+            const layer = layerSelect.value;
+            const neuronIndex = parseInt(neuronInput.value);
+
+            if (cachedLayer !== layer || !cachedData) {
+                const response = await fetch(`neuron_viewer_data/layer_${layer}.json`, {
+                    mode: 'cors'
+                });
+                cachedData = await response.json();
+                cachedLayer = layer;
+            }
+            const neuron_text_snippets = cachedData[neuronIndex];
+
+            outputDiv.innerHTML = '';
+
+            neuron_text_snippets.forEach(snippet => {
+                const tokens = snippet.tokens;
+                const colors = snippet.activations;
+
+                const snippetDiv = document.createElement('div');
+                snippetDiv.className = 'line';
+
+                tokens.forEach((token, index) => {
+                    const color = getColor(colors[index]);
+                    const tokenSpan = document.createElement('span');
+                    tokenSpan.className = 'token';
+                    tokenSpan.style.backgroundColor = color;
+                    tokenSpan.style.fontFamily = 'monospace';
+                    tokenSpan.style.padding = '0';
+                    tokenSpan.style.margin = '0';
+                    tokenSpan.style.whiteSpace = 'pre';
+                    tokenSpan.textContent = token.replace(/\n/g, '⏎').replace(/\t/g, '⇥');
+                    snippetDiv.appendChild(tokenSpan);
+                });
+                outputDiv.appendChild(snippetDiv);
+            });
+
+            // Update URL hash with current state
+            updateURLHash(layer, neuronIndex);
+
+        });
+
+        function loadStateFromHash() {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                const [layer, neuron] = hash.split(',');
+                if (layer && neuron) {
+                    layerSelect.value = layer;
+                    neuronInput.value = neuron;
+                    submitButton.click();
+                }
+            } else {
+                // Get layer and neuron from HTML elements
+                const layer = layerSelect.value;
+                const neuron = neuronInput.value;
+                if (layer && neuron) {
+                    submitButton.click();
+                }
+            }
+        }
+
+        function updateURLHash(layer, neuron) {
+            window.location.hash = `#${layer},${neuron}`;
+        }
+
+        function getColor(value) {
+            const normalizedValue = value / 10 / 2;
+            const hue = 10; // Orange Red
+            const saturation = 100; // Full saturation
+            const lightness = 100 - (normalizedValue * 50); // Interpolate lightness from white to orange
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        }
+    </script>
+</body>
+
+</html>
