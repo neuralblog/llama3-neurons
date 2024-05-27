@@ -135,7 +135,8 @@
             <option value="31">31</option>
         </select>
         <label for="neuron">Neuron:</label>
-        <input type="number" id="neuron" value="0">
+        <input type="number" id="neuron" value="0"
+            onkeydown="if (event.key === 'Enter') document.getElementById('submit').click()">
         <button id="submit" class="button-8" role="button">Submit</button>
         <button id="previous" class="button-8" role="button">&#x25C0;</button>
         <button id="next" class="button-8" role="button">&#x25B6;</button>
@@ -143,8 +144,8 @@
 
     <div class="tag-list">
         <span>Examples:</span>
-        <span class="tag" onclick="setNeuron(5, 43)">Looks like</span>
         <span class="tag" onclick="setNeuron(0, 2)">Android</span>
+        <span class="tag" onclick="setNeuron(5, 43)">Looks like</span>
         <span class="tag" onclick="setNeuron(7, 251)">Wow</span>
         <span class="tag" onclick="setNeuron(7, 263)">Everyone</span>
         <span class="tag" onclick="setNeuron(14, 1)">Figure</span>
@@ -154,7 +155,12 @@
         <span class="tag" onclick="setNeuron(15, 38)">Break</span>
         <span class="tag" onclick="setNeuron(18, 46)">As well as</span>
         <span class="tag" onclick="setNeuron(18, 186)">Months</span>
-
+        <span class="tag" onclick="setNeuron(19,308)">Reviews</span>
+        <span class="tag" onclick="setNeuron(20,527)">Persists</span>
+        <span class="tag" onclick="setNeuron(21,606)">Discount</span>
+        <span class="tag" onclick="setNeuron(22,700)">Withdraw</span>
+        <span class="tag" onclick="setNeuron(23,810)">Bed</span>
+        <span class="tag" onclick="setNeuron(24,903)">Intelligent person</span>
     </div>
 
     <br />
@@ -174,6 +180,11 @@
             loadStateFromHash();
         });
 
+        layerSelect.addEventListener('change', () => {
+            if (layerSelect.value !== cachedLayer) {
+                neuronInput.value = 0;
+            }
+        });
 
         function setNeuron(layer, neuron) {
             layerSelect.value = layer;
