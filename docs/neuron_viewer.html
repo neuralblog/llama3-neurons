@@ -145,7 +145,6 @@
         <span>Examples:</span>
         <span class="tag" onclick="setNeuron(0, 2)">Android</span>
         <span class="tag" onclick="setNeuron(5, 43)">Looks like</span>
-        <span class="tag" onclick="setNeuron(7, 251)">Wow</span>
         <span class="tag" onclick="setNeuron(7, 263)">Everyone</span>
         <span class="tag" onclick="setNeuron(14, 1)">Figure</span>
         <span class="tag" onclick="setNeuron(14, 19)">Cell</span>
@@ -155,7 +154,6 @@
         <span class="tag" onclick="setNeuron(18, 186)">Months</span>
         <span class="tag" onclick="setNeuron(19,308)">Reviews</span>
         <span class="tag" onclick="setNeuron(20,527)">Persists</span>
-        <span class="tag" onclick="setNeuron(21,606)">Discount</span>
         <span class="tag" onclick="setNeuron(22,700)">Withdraw</span>
         <span class="tag" onclick="setNeuron(23,810)">Bed</span>
         <span class="tag" onclick="setNeuron(24,903)">Intelligent person</span>
@@ -174,6 +172,7 @@
 
         let cachedData = null;
         let cachedLayer = null;
+        let cachedChunk = null;
 
         // Load initial state from URL hash
         document.addEventListener('DOMContentLoaded', loadStateFromHash);
@@ -198,10 +197,12 @@
         async function displayNeuronData() {
             const layer = layerSelect.value;
             const neuronIndex = parseInt(neuronInput.value);
+            const chunk = Math.floor(neuronIndex / 1000) * 1000;
 
-            if (cachedLayer !== layer || !cachedData) {
-                cachedData = await fetchLayerData(layer);
+            if (cachedLayer !== layer || chunk != cachedChunk || !cachedData) {
+                cachedData = await fetchLayerData(layer, chunk);
                 cachedLayer = layer;
+                cachedChunk = chunk;
             }
 
             const neuronTextSnippets = cachedData[neuronIndex];
@@ -209,11 +210,13 @@
             updateURLHash(layer, neuronIndex);
         }
 
-        async function fetchLayerData(layer) {
-            const response = await fetch(`neuron_viewer_data/layer_${layer}.json`, { mode: 'cors' });
-            return await response.json();
+        async function fetchLayerData(layer, chunk) {
+            outputDiv.innerHTML = 'Loading...';
+            const response = await fetch(`neuron_viewer_data/layer_${layer}_chunk_${chunk}.json`, { mode: 'cors' });
+            const data = await response.json();
+            outputDiv.innerHTML = '';
+            return data;
         }
-
         function renderNeuronTextSnippets(neuronTextSnippets) {
             outputDiv.innerHTML = '';
 
@@ -250,7 +253,7 @@
                 const currentLayer = parseInt(layerSelect.value);
                 if (currentLayer > 0) {
                     layerSelect.value = currentLayer - 1;
-                    currentNeuron = 999;
+                    currentNeuron = 14336 - 1;
                 } else {
                     currentNeuron = 0;
                 }
@@ -262,13 +265,13 @@
         function goToNextNeuron() {
             let currentNeuron = parseInt(neuronInput.value);
             currentNeuron++;
-            if (currentNeuron >= 1000) {
+            if (currentNeuron >= 14336) {
                 const currentLayer = parseInt(layerSelect.value);
                 if (currentLayer < 31) {
                     layerSelect.value = currentLayer + 1;
                     currentNeuron = 0;
                 } else {
-                    currentNeuron = 999;
+                    currentNeuron = 14336 - 1;
                 }
             }
             neuronInput.value = currentNeuron;
