@@ -95,8 +95,7 @@
 </head>
 
 <body>
-    <h1><a href="#" style="text-decoration: none; color: inherit;">Llama3 MLP Neuron Viewer</a></h1>
-
+    <h1><a href="/neuron_viewer.html" style="text-decoration: none; color: inherit;">Llama3 MLP Neuron Viewer</a></h1>
     <div>
         <label for="layer">Layer:</label>
         <select id="layer">
@@ -152,11 +151,11 @@
         <span class="tag" onclick="setNeuron(15, 38)">Port</span>
         <span class="tag" onclick="setNeuron(18, 46)">As well as</span>
         <span class="tag" onclick="setNeuron(18, 186)">Months</span>
-        <span class="tag" onclick="setNeuron(19,308)">Reviews</span>
-        <span class="tag" onclick="setNeuron(20,527)">Persists</span>
-        <span class="tag" onclick="setNeuron(22,700)">Withdraw</span>
-        <span class="tag" onclick="setNeuron(23,810)">Bed</span>
-        <span class="tag" onclick="setNeuron(24,903)">Intelligent person</span>
+        <span class="tag" onclick="setNeuron(20, 527)">Persists</span>
+        <span class="tag" onclick="setNeuron(22, 700)">Withdraw</span>
+        <span class="tag" onclick="setNeuron(23, 810)">Bed</span>
+        <span class="tag" onclick="setNeuron(24, 903)">Intelligent person</span>
+        <span class="tag" onclick="setNeuron(24, 928)">Typos</span>
     </div>
 
     <br />
@@ -195,8 +194,12 @@
         }
 
         async function displayNeuronData() {
-            const layer = layerSelect.value;
-            const neuronIndex = parseInt(neuronInput.value);
+            const layer = clampLayer(parseInt(layerSelect.value));
+            const neuronIndex = clampNeuron(parseInt(neuronInput.value));
+
+            layerSelect.value = layer.toString();
+            neuronInput.value = neuronIndex.toString();
+
             const chunk = Math.floor(neuronIndex / 1000) * 1000;
 
             if (cachedLayer !== layer || chunk != cachedChunk || !cachedData) {
@@ -208,6 +211,14 @@
             const neuronTextSnippets = cachedData[neuronIndex];
             renderNeuronTextSnippets(neuronTextSnippets);
             updateURLHash(layer, neuronIndex);
+        }
+
+        function clampLayer(layer) {
+            return Math.max(0, Math.min(layer, 31));
+        }
+
+        function clampNeuron(neuron) {
+            return Math.max(0, Math.min(neuron, 14335));
         }
 
         async function fetchLayerData(layer, chunk) {
@@ -253,7 +264,7 @@
                 const currentLayer = parseInt(layerSelect.value);
                 if (currentLayer > 0) {
                     layerSelect.value = currentLayer - 1;
-                    currentNeuron = 14336 - 1;
+                    currentNeuron = 14335;
                 } else {
                     currentNeuron = 0;
                 }
@@ -265,13 +276,13 @@
         function goToNextNeuron() {
             let currentNeuron = parseInt(neuronInput.value);
             currentNeuron++;
-            if (currentNeuron >= 14336) {
+            if (currentNeuron > 14335) {
                 const currentLayer = parseInt(layerSelect.value);
                 if (currentLayer < 31) {
                     layerSelect.value = currentLayer + 1;
                     currentNeuron = 0;
                 } else {
-                    currentNeuron = 14336 - 1;
+                    currentNeuron = 14335;
                 }
             }
             neuronInput.value = currentNeuron;
