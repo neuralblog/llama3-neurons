@@ -2,6 +2,8 @@
 
 This codebase is used to collect text snippets that strongly activate MLP neurons in the Llama3-8B model.
 
+**Note**: If you don't want to download the neuron data (which is likely the case), add the `--single-branch` flag to your `git clone` command.
+
 ## Data Preparation
 
 We use the FineWeb-Edu dataset (`sample-10BT` subset). Use the following commands to download the dataset to the `./data` local directory:
