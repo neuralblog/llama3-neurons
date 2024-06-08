@@ -15,12 +15,8 @@ FLAGS = parser.parse_args()
 
 num_layers = 32
 num_neurons_per_layer = 14336
-top_start_index = np.load("index.npy")
-top_start_index = np.reshape(top_start_index, (-1, num_neurons_per_layer, num_layers))
-top_seq_act = np.load("act.npy")
-assert top_seq_act.shape[0] == 32  # top 32
-assert top_seq_act.shape[1] == 64  # seq len 64
-top_seq_act = np.reshape(top_seq_act, (32, 64, num_neurons_per_layer, num_layers))
+top_start_index = np.load("index.npy")  # layer x neuron x topk
+top_seq_act = np.load("act.npy")  # # layer x neuron x topk x seq
 
 data = np.memmap(FLAGS.data_file, dtype=np.uint32, mode="r")
 tokenizer = Tokenizer(FLAGS.tokenizer_file)
@@ -30,7 +26,7 @@ for layer in range(0, num_layers):
         chunk_end = min(chunk_start + 1000, top_start_index.shape[1])
         layer_data = {}
         for neuron in tqdm(range(chunk_start, chunk_end)):
-            indices = top_start_index[:, neuron, layer]
+            indices = top_start_index[layer, neuron, :]
             batch = []
             for s in indices:
                 e = s + 128
@@ -41,7 +37,7 @@ for layer in range(0, num_layers):
                 batch.append(data[a:b])
 
             tokens = np.stack(batch, axis=0)
-            act = top_seq_act[:, :, neuron, layer]
+            act = top_seq_act[layer, neuron, :, :]
             act = act - act.min()
             act = act / act.max() * 10
             act = act.astype(np.int32)

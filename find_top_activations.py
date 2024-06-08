@@ -109,10 +109,14 @@ for it, (token_, start_index_) in tqdm(
     start_index = torch.repeat_interleave(start_index[:, None], 458752, 1)
     top_act(seq_act, start_index)
 
-    if it % 5000 == 0:
-        np.save("index.npy", top_act.top_start_index.cpu().numpy())
-        np.save("act.npy", top_act.top_seq_act.float().cpu().numpy())
+index = top_act.top_start_index
+act = top_act.top_seq_act
 
+index = index.reshape(index.shape[0], 14336, 32)  # topk x neuron x layer
+act = act.reshape(act.shape[0], act.shape[1], 14336, 32)  # topk x seq x neuron x layer
 
-np.save("index.npy", top_act.top_start_index.cpu().numpy())
-np.save("act.npy", top_act.top_seq_act.float().cpu().numpy())
+index = index.permute(2, 1, 0)  # layer x neuron x topk
+act = act.permute(3, 2, 0, 1)  # layer x neuron x topk x seq
+
+np.save("index.npy", index.cpu().numpy())
+np.save("act.npy", act.float().cpu().numpy())
